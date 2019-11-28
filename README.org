@@ -11,6 +11,7 @@ grafos na linguage CUDA, para GPUs.
 ** Sumário                                                           :TOC_3:
   - [[#objetivo][Objetivo]]
   - [[#estrutura-do-projeto][Estrutura do Projeto]]
+    - [[#ferramentas-utilizadas][Ferramentas Utilizadas]]
   - [[#compilação][Compilação]]
   - [[#contato][Contato]]
 
@@ -53,6 +54,19 @@ tree -nd
 
 7 directories
 #+end_example
+
+*** Ferramentas Utilizadas
+
+Utilizamos algumas ferramentas /open-source/ no processo de desenvolvimento
+desse trabalho.
+
+1. {fmt}
+
+   Para a formatação simples (estilo Python) de strings para as saídas padrão.
+
+2. cxxopts
+
+   Para o parseamento de opções provenientes da linha de comando
 
 ** Compilação
 
