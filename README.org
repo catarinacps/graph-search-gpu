@@ -65,7 +65,7 @@ desse trabalho:
 
    Para a formatação simples (estilo Python) de strings para as saídas padrão.
 
-2. cxxopts ([[https://github.com/jarro2783/cxxopts][GitHub page]])
+2. /cxxopts/ ([[https://github.com/jarro2783/cxxopts][GitHub page]])
 
    Para o parseamento de opções provenientes da linha de comando.
 
