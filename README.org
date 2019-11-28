@@ -46,27 +46,28 @@ tree -nd
 .
 ├── bin
 ├── build
+├── data
 ├── include
-│   └── c-template
+│   ├── cxxopts
+│   └── fmt
 ├── lib
-├── scripts
 └── src
 
-7 directories
+8 directories
 #+end_example
 
 *** Ferramentas Utilizadas
 
 Utilizamos algumas ferramentas /open-source/ no processo de desenvolvimento
-desse trabalho.
+desse trabalho:
 
-1. {fmt}
+1. /{fmt}/ ([[https://github.com/fmtlib/fmt][GitHub page]])
 
    Para a formatação simples (estilo Python) de strings para as saídas padrão.
 
-2. cxxopts
+2. cxxopts ([[https://github.com/jarro2783/cxxopts][GitHub page]])
 
-   Para o parseamento de opções provenientes da linha de comando
+   Para o parseamento de opções provenientes da linha de comando.
 
 ** Compilação
 
