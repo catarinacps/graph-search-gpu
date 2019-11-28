@@ -1,35 +1,20 @@
 #include "parse.h"
 
-cxxopts::ParseResult parse_options(int argc, char* argv[])
+std::unique_ptr<gsg::graph> parse_file(const std::string& path)
 {
-    try {
-        cxxopts::Options options(argv[0], " - search a graph");
+    std::ifstream file(path);
+    uint32_t num_nodes;
 
-        options
-            .positional_help("[optional arguments]")
-            .show_positional_help();
+    file >> num_nodes;
 
-        options
-            .add_options()
-            ("e, element",
-             "the element being searched",
-             cxxopts::value<int>()->default_value("5000"));
+    auto read_graph = std::make_unique<gsg::graph>(num_nodes);
 
-        options
-            .add_options("GPU options")
-            ("b, block",
-             "the block size used",
-             cxxopts::value<int>());
+    int pos_a, pos_b, weight;
 
-        options.parse_positional({"method", "instance"});
-
-        return options.parse(argc, argv);
-    } catch (const cxxopts::OptionException& e) {
-        printf("oh well");
+    while (file >> pos_a >> pos_b >> weight) {
+        read_graph->matrix[pos_a][pos_b] = weight;
+        read_graph->matrix[pos_b][pos_a] = weight;
     }
-}
 
-void parse_file(const std::string& path)
-{
-    return;
+    return read_graph;
 }

@@ -76,7 +76,7 @@ $(TARGET): $(OUT_DIR)/%: $(SRC_DIR)/%.cpp $(OBJ)
 	$(CC) -o $@ $^ $(INC) $(LIB) $(DEBUGF) $(OPT)
 
 #	- Objects:
-$(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+$(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CC) -c -o $@ $< $(INC) $(CFLAGS) $(DEBUGF) $(OPT)
 
@@ -88,7 +88,7 @@ $(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 all: $(TARGET)
 
 clean:
-	rm -f $(OBJ_DIR)/*.o $(INC_DIR)/*~ $(TARGET) *~ *.o
+	rm -rf $(OBJ_DIR)/* $(INC_DIR)/*~ $(TARGET) *~ *.o
 
 redo: clean all
 

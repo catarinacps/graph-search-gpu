@@ -1,11 +1,9 @@
 #pragma once
 
 #include <fstream>
-#include <string>
 #include <memory>
+#include <string>
 
-#include <cxxopts/cxxopts.hpp>
+#include "graph.h"
 
-std::unique_ptr< parse_file(const std::string& path);
-
-cxxopts::ParseResult parse_options(int argc, char* argv[]);
+std::unique_ptr<gsg::graph> parse_file(const std::string& path);
