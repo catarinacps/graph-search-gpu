@@ -4,6 +4,7 @@
 #include <clipp/clipp.h>
 #include <fmt/core.h>
 
+#include "utils/utils.h"
 #include "utils/parse.h"
 #include "utils/graph.h"
 #include "methods/host.h"
@@ -56,11 +57,28 @@ int main(int argc, char* argv[])
             return ret ? 0 : 1;
         } break;
         case method::floyd: {
-            fmt::print("hiya!");
+            auto graph = gsg::parse_file(path_to_instance);
+
+            bool ret = gsg::floyd_warshall(*graph, verbose);
+
+            if (verbose) {
+                if (ret) {
+                    fmt::print("\n\nall is well, and the vertex is found\n");
+                } else {
+                    fmt::print("\n\nsad because no vertex\n");
+                }
+            }
+
+            std::cout << std::endl;
+            return ret ? 0 : 1;
         } break;
         case method::help: {
             std::cout << make_man_page(cli, argv[0])
-                .prepend_section("DESCRIPTION", "        finds an element in a graph using different methods");
+                .prepend_section("DESCRIPTION",
+                                 "        "
+                                 "finds an element in a graph using different methods\n"
+                                 "these methods are intended as a way of comparing the "
+                                 "different effectiveness in visiting a whole graph");
         } break;
         }
     } else {

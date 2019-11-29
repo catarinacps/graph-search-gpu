@@ -2,12 +2,14 @@
 
 #include <memory>
 #include <vector>
+#include <cstring>
 
 namespace gsg {
 
 struct graph {
 private:
     int* data;
+
 public:
     const uint32_t size;
     std::vector<int*> matrix;
@@ -19,6 +21,15 @@ public:
     {
         for (uint i = 0; i < this->size; i++)
             matrix[i] = &data[i * this->size];
+    }
+
+    graph(const graph& copy)
+        : data((int*)calloc(copy.size * copy.size, sizeof(int)))
+        , size(copy.size)
+        , matrix(copy.size)
+    {
+        for (uint i = 0; i < this->size; i++)
+            std::memcpy(matrix[i], copy.matrix[i], this->size * sizeof(int));
     }
 
     ~graph()

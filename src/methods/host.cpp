@@ -48,4 +48,27 @@ bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, 
     return false;
 }
 
+bool floyd_warshall(const graph& input, bool verbose)
+{
+    gsg::graph distances(input);
+
+    auto initial_time = gsg::get_time();
+
+    for (uint k = 0; k < input.size; k++) {
+        for (uint i = 0; i < input.size; i++) {
+            for (uint j = 0; j < input.size; j++) {
+                if (distances.matrix[i][k] + distances.matrix[k][j] < distances.matrix[i][j]) {
+                    if (verbose)
+                        fmt::print("k ({}) is in the shortest path between i ({}) and j ({})\n", k, i, j);
+                    distances.matrix[i][j] = distances.matrix[i][k] + distances.matrix[k][j];
+                }
+            }
+        }
+    }
+
+    fmt::print("time: {}", get_time() - initial_time);
+
+    return true;
+}
+
 }
