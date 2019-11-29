@@ -28,9 +28,9 @@ int main(int argc, char* argv[])
 
     auto methods = (
         (command("bfs").set(selected, method::bfs) % "use the BFS method to find the element" |
-         command("floyd").set(selected, method::floyd) % "use the floyd method to find the element") % "possible methods:",
-        (option("-v", "--vertex") & value("VERTEX=5000", searched_vertex)) % "the vertex being searched for (default: 5000)",
-        (option("-i", "--initial") & value("INITIAL=0", initial_vertex)) % "where to start from (default: 0)");
+         command("floyd").set(selected, method::floyd) % "use the floyd-warshall method to find the element") % "possible methods:",
+        (option("-s", "--search") & value("VERTEX", searched_vertex)) % "the vertex being searched for (default: 5000)",
+        (option("-i", "--initial") & value("INITIAL", initial_vertex)) % "where to start from (default: 0)");
 
     auto cli = (
         command("help").set(selected, method::help) |
@@ -46,21 +46,27 @@ int main(int argc, char* argv[])
 
             if (verbose) {
                 if (ret) {
-                    fmt::print("all is well, and the element is found\n");
+                    fmt::print("\n\nall is well, and the vertex is found\n");
                 } else {
-                    fmt::print("sad because no element\n");
+                    fmt::print("\n\nsad because no vertex\n");
                 }
             }
+
+            return ret ? 0 : 1;
         } break;
         case method::floyd: {
             fmt::print("hiya!");
         } break;
         case method::help: {
-            std::cout << make_man_page(cli, argv[0]).prepend_section("DESCRIPTION", "        finds a element in a graph");
+            std::cout << make_man_page(cli, argv[0])
+                .prepend_section("DESCRIPTION", "        finds an element in a graph using different methods");
         } break;
         }
     } else {
         fmt::print("Please follow the following usage lines:\n");
-        std::cout << usage_lines(cli, argv[0]) << std::endl;
+        fmt::print(usage_lines(cli, argv[0]).str());
     }
+
+    std::cout << std::endl;
+    return 0;
 }

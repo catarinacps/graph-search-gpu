@@ -6,23 +6,24 @@
 namespace gsg {
 
 struct graph {
+private:
+    int* data;
 public:
-    const uint32_t num_nodes;
+    const uint32_t size;
     std::vector<int*> matrix;
 
     graph(uint32_t num_nodes_p)
-        : num_nodes(num_nodes_p)
+        : data((int*)calloc(num_nodes_p * num_nodes_p, sizeof(int)))
+        , size(num_nodes_p)
         , matrix(num_nodes_p)
     {
-        auto temp_array = (int*)calloc(this->num_nodes * this->num_nodes, sizeof(int));
-
-        for (uint i = 0; i < this->num_nodes; i++)
-            matrix[i] = &temp_array[i * this->num_nodes];
+        for (uint i = 0; i < this->size; i++)
+            matrix[i] = &data[i * this->size];
     }
 
     ~graph()
     {
-        delete &matrix[0][0];
+        delete data;
     }
 };
 
