@@ -6,4 +6,8 @@
 
 #include "graph.h"
 
-std::unique_ptr<gsg::graph> parse_file(const std::string& path);
+namespace gsg {
+
+std::unique_ptr<graph> parse_file(const std::string& path);
+
+}

@@ -6,9 +6,8 @@
 namespace gsg {
 
 class graph {
-    uint32_t num_nodes;
-
 public:
+    const uint32_t num_nodes;
     std::vector<std::vector<int>> matrix;
 
     graph(uint32_t num_nodes_p)
