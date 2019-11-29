@@ -6,7 +6,7 @@
 
 #include "utils/parse.h"
 #include "utils/graph.h"
-#include "methods/cpu.h"
+#include "methods/host.h"
 
 using namespace clipp;
 
