@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <queue>
+#include <vector>
 
 #include <fmt/core.h>
 
@@ -10,6 +10,6 @@
 
 namespace gsg {
 
-bool bfs(const graph& input, int element, bool verbose = false);
+bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose = false);
 
 }

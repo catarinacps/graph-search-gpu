@@ -18,7 +18,7 @@ enum class method {
 
 int main(int argc, char* argv[])
 {
-    int searched_number = 5000;
+    uint32_t searched_vertex = 5000, initial_vertex = 0;
     auto selected = method::help;
     bool verbose = false;
     std::string path_to_instance;
@@ -29,8 +29,8 @@ int main(int argc, char* argv[])
     auto methods = (
         (command("bfs").set(selected, method::bfs) % "use the BFS method to find the element" |
          command("floyd").set(selected, method::floyd) % "use the floyd method to find the element") % "possible methods:",
-        (option("-e", "--element") & value("ELEMENT=5000", searched_number)) % "the element being searched for (default: 5000)",
-        option("-t", "--test") % "only a test");
+        (option("-v", "--vertex") & value("VERTEX=5000", searched_vertex)) % "the vertex being searched for (default: 5000)",
+        (option("-i", "--initial") & value("INITIAL=0", initial_vertex)) % "where to start from (default: 0)");
 
     auto cli = (
         command("help").set(selected, method::help) |
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
         case method::bfs: {
             auto graph = gsg::parse_file(path_to_instance);
 
-            bool ret = gsg::bfs(*graph.get(), searched_number, verbose);
+            bool ret = gsg::bfs(*graph.get(), searched_vertex, initial_vertex, verbose);
 
             if (verbose) {
                 if (ret) {
