@@ -98,7 +98,7 @@ No processo de compilação, são gerados dois binários:
 - gpu :: para a execução em GPU
 
 Dada compilação, primeiro é necessário adicionar à =LD_LIBRARY_PATH= a
-biblioteca /fmt/:
+biblioteca compartilhada /fmt/:
 
 #+begin_src bash :exports both :results output
 export LD_LIBRARY_PATH+=:$(readlink -f lib)

@@ -1,4 +1,4 @@
-#include "methods.h"
+#include "cpu.h"
 
 namespace gsg {
 
