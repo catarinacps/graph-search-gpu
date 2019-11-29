@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
         case method::bfs: {
             auto graph = gsg::parse_file(path_to_instance);
 
-            bool ret = gsg::bfs(*graph.get(), searched_vertex, initial_vertex, verbose);
+            bool ret = gsg::bfs(*graph, searched_vertex, initial_vertex, verbose);
 
             if (verbose) {
                 if (ret) {
@@ -52,6 +52,7 @@ int main(int argc, char* argv[])
                 }
             }
 
+            std::cout << std::endl;
             return ret ? 0 : 1;
         } break;
         case method::floyd: {

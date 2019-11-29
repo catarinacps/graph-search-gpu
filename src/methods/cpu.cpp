@@ -23,7 +23,7 @@ bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, 
             if (verbose)
                 fmt::print("and found the objetive ({})\n", searched_vertex);
 
-            fmt::print("\ntime: {}", get_time() - initial_time);
+            fmt::print("time: {}", get_time() - initial_time);
 
             return true;
         }
@@ -41,9 +41,9 @@ bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, 
     }
 
     if (verbose)
-        fmt::print("\ndid not found {}", searched_vertex);
+        fmt::print("\ndid not found {}\n", searched_vertex);
 
-    fmt::print("\ntime: {}", get_time() - initial_time);
+    fmt::print("time: {}", get_time() - initial_time);
 
     return false;
 }
