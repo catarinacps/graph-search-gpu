@@ -13,6 +13,7 @@ grafos na linguage CUDA, para GPUs.
   - [[#estrutura-do-projeto][Estrutura do Projeto]]
     - [[#ferramentas-utilizadas][Ferramentas Utilizadas]]
   - [[#compilação][Compilação]]
+  - [[#execução][Execução]]
   - [[#contato][Contato]]
 
 ** Objetivo
@@ -48,12 +49,14 @@ tree -nd
 ├── build
 ├── data
 ├── include
-│   ├── cxxopts
+│   ├── clipp
 │   └── fmt
 ├── lib
 └── src
+    ├── methods
+    └── utils
 
-8 directories
+10 directories
 #+end_example
 
 *** Ferramentas Utilizadas
@@ -65,7 +68,7 @@ desse trabalho:
 
    Para a formatação simples (estilo Python) de strings para as saídas padrão.
 
-2. /cxxopts/ ([[https://github.com/jarro2783/cxxopts][GitHub page]])
+2. /clipp/ ([[https://github.com/muellan/clipp][GitHub page]])
 
    Para o parseamento de opções provenientes da linha de comando.
 
@@ -85,6 +88,27 @@ make -j<NUMBER_OF_CORES>
 
 # ex:
 make -j4
+#+end_src
+
+** Execução
+
+No processo de compilação, são gerados dois binários:
+
+- cpu :: para a execução em CPU
+- gpu :: para a execução em GPU
+
+Dada compilação, primeiro é necessário adicionar à =LD_LIBRARY_PATH= a
+biblioteca /fmt/:
+
+#+begin_src bash :exports both :results output
+export LD_LIBRARY_PATH+=:$(readlink -f lib)
+#+end_src
+
+Após esse passo, verifique as opções de execução do binário desejado conforme o
+seguinte comando:
+
+#+begin_src bash :exports both :results output
+./build/<binário> help
 #+end_src
 
 ** Contato
