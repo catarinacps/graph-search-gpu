@@ -10,8 +10,11 @@
 
 namespace gsg {
 
-bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose = false);
+namespace cpu {
 
-bool floyd_warshall(const graph& input, bool verbose = false);
+    bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose = false);
+
+    bool floyd_warshall(const graph& input, bool verbose = false);
+}
 
 }

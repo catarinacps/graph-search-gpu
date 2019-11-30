@@ -39,7 +39,7 @@ CUDA_LIB ?= /opt/cuda/lib
 #	- Compilation flags:
 #	Compiler and language version
 CC := g++ -std=c++17
-CUDAC := nvcc
+CUDAC := clang++ -std=c++17 -x cuda --cuda-gpu-arch=sm_35
 #	If DEBUG is defined (through command line), we'll turn on the debug flag and
 #	attach address sanitizer on the executables.
 DEBUGF := $(if $(DEBUG),-g -fsanitize=address -fno-omit-frame-pointer)

@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 
             bool ret;
             if (selected_i == imp::cpu) {
-                ret = gsg::bfs(*graph, searched_vertex, initial_vertex, verbose);
+                ret = gsg::cpu::bfs(*graph, searched_vertex, initial_vertex, verbose);
             } else {
             }
 
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 
             bool ret;
             if (selected_i == imp::cpu) {
-                ret = gsg::floyd_warshall(*graph, verbose);
+                ret = gsg::cpu::floyd_warshall(*graph, verbose);
             } else {
             }
 
