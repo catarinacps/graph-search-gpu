@@ -14,28 +14,26 @@ public:
     const uint32_t size;
     std::vector<int*> matrix;
 
-    graph(uint32_t num_nodes_p)
-        : data((int*)calloc(num_nodes_p * num_nodes_p, sizeof(int)))
-        , size(num_nodes_p)
-        , matrix(num_nodes_p)
-    {
-        for (uint i = 0; i < this->size; i++)
-            matrix[i] = &data[i * this->size];
-    }
+    /** Simple graph constructor.
+     *
+     * @param num_nodes_p the desired graph cardinality
+     */
+    graph(uint32_t num_nodes_p);
 
-    graph(const graph& copy)
-        : data((int*)calloc(copy.size * copy.size, sizeof(int)))
-        , size(copy.size)
-        , matrix(copy.size)
-    {
-        for (uint i = 0; i < this->size; i++)
-            std::memcpy(matrix[i], copy.matrix[i], this->size * sizeof(int));
-    }
+    /** Simple graph copy constructor.
+     *
+     * @param copy the graph to be copied
+     */
+    graph(const graph& copy);
 
-    ~graph()
-    {
-        delete data;
-    }
+    /* Default move constructor. */
+    graph(graph&& move) = default;
+
+    /* No empty constructor! */
+    graph() = delete;
+
+    /* Frees the memory on the member data. */
+    ~graph();
 };
 
 }
