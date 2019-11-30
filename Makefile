@@ -51,7 +51,7 @@ CFLAGS :=\
 	-Wshadow \
 	-Wunreachable-code
 OPT := $(if $(DEBUG),-O0,-O3 -march=native)
-LIB := -L$(LIB_DIR) -L$(CUDA_PATH)/lib $(LIB_EXTRA) \
+LIB := -L$(LIB_DIR) -L$(CUDA_PATH)/lib64 $(LIB_EXTRA) \
 	-lfmt \
 	-lcudart \
 	-lcudadevrt
