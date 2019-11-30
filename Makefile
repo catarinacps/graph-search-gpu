@@ -34,12 +34,13 @@ LIB_DIR := lib
 LIB_EXTRA :=
 INC_EXTRA :=
 
-CUDA_LIB ?= /opt/cuda/lib
+#	Default CUDA path, define it through the shell to something else if needed
+CUDA_PATH ?= /opt/cuda
 
 #	- Compilation flags:
 #	Compiler and language version
 CC := g++ -std=c++17
-CUDAC := clang++ -std=c++17 -x cuda --cuda-gpu-arch=sm_35
+CUDAC := clang++ -std=c++17 -x cuda --cuda-path=$(CUDA_PATH) --cuda-gpu-arch=sm_35
 #	If DEBUG is defined (through command line), we'll turn on the debug flag and
 #	attach address sanitizer on the executables.
 DEBUGF := $(if $(DEBUG),-g -fsanitize=address -fno-omit-frame-pointer)
@@ -50,7 +51,7 @@ CFLAGS :=\
 	-Wshadow \
 	-Wunreachable-code
 OPT := $(if $(DEBUG),-O0,-O3 -march=native)
-LIB := -L$(LIB_DIR) -L$(CUDA_LIB) $(LIB_EXTRA) \
+LIB := -L$(LIB_DIR) -L$(CUDA_PATH)/lib $(LIB_EXTRA) \
 	-lfmt \
 	-lcudart \
 	-lcudadevrt
@@ -87,7 +88,7 @@ $(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CC) -c -o $@ $< $(INC) $(CFLAGS) $(DEBUGF) $(OPT)
 
-#	- CUDA:
+#	- CUDA objects:
 $(CUDA): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cu
 	@mkdir -p $(dir $@)
 	$(CUDAC) -c -o $@ $< $(INC)
