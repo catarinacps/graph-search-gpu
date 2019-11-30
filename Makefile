@@ -34,6 +34,8 @@ LIB_DIR := lib
 LIB_EXTRA :=
 INC_EXTRA :=
 
+CUDA_LIB ?= /opt/cuda/lib
+
 #	- Compilation flags:
 #	Compiler and language version
 CC := g++ -std=c++17
@@ -48,8 +50,10 @@ CFLAGS :=\
 	-Wshadow \
 	-Wunreachable-code
 OPT := $(if $(DEBUG),-O0,-O3 -march=native)
-LIB := -L$(LIB_DIR) $(LIB_EXTRA) \
-	-lfmt
+LIB := -L$(LIB_DIR) -L$(CUDA_LIB) $(LIB_EXTRA) \
+	-lfmt \
+	-lcudart \
+	-lcudadevrt
 INC := -I$(INC_DIR) -I$(SRC_DIR) $(INC_EXTRA)
 
 ################################################################################
@@ -68,17 +72,25 @@ SRC := $(shell find $(SRC_DIR) -mindepth 2 -name '*.cpp' | cut -d'/' -f2-)
 #	- Objects to be created:
 OBJ := $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRC))
 
+#	- CUDA objects
+CUDA := $(patsubst %.cu, $(OBJ_DIR)/%.o, $(shell find $(SRC_DIR) -mindepth 2 -name '*.cu' | cut -d'/' -f2-))
+
 ################################################################################
 #	Rules:
 
 #	- Executables:
-$(TARGET): $(OUT_DIR)/%: $(SRC_DIR)/%.cpp $(OBJ)
+$(TARGET): $(OUT_DIR)/%: $(SRC_DIR)/%.cpp $(OBJ) $(CUDA)
 	$(CC) -o $@ $^ $(INC) $(LIB) $(DEBUGF) $(OPT)
 
 #	- Objects:
 $(OBJ): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CC) -c -o $@ $< $(INC) $(CFLAGS) $(DEBUGF) $(OPT)
+
+#	- CUDA:
+$(CUDA): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cu
+	@mkdir -p $(dir $@)
+	$(CUDAC) -c -o $@ $< $(INC)
 
 ################################################################################
 #	Targets:
