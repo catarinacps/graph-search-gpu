@@ -8,13 +8,10 @@
 #include "utils/graph.h"
 #include "utils/utils.h"
 
-namespace gsg {
+namespace gsg::cpu {
 
-namespace cpu {
+bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose = false);
 
-    bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose = false);
-
-    bool floyd_warshall(const graph& input, bool verbose = false);
-}
+bool floyd_warshall(const graph& input, bool verbose = false);
 
 }

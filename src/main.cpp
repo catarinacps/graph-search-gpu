@@ -8,6 +8,7 @@
 #include "utils/parse.h"
 #include "utils/graph.h"
 #include "methods/host.h"
+#include "methods/device.cuh"
 
 using namespace clipp;
 
@@ -54,7 +55,7 @@ int main(int argc, char* argv[])
         case method::bfs: {
             auto graph = gsg::parse_file(path_to_instance);
 
-            bool ret;
+            bool ret = false;
             if (selected_i == imp::cpu) {
                 ret = gsg::cpu::bfs(*graph, searched_vertex, initial_vertex, verbose);
             } else {
@@ -74,10 +75,11 @@ int main(int argc, char* argv[])
         case method::floyd: {
             auto graph = gsg::parse_file(path_to_instance);
 
-            bool ret;
+            bool ret = false;
             if (selected_i == imp::cpu) {
                 ret = gsg::cpu::floyd_warshall(*graph, verbose);
             } else {
+                gsg::cuda::floyd_warshall(*graph, 32, verbose);
             }
 
             if (verbose) {

@@ -3,24 +3,14 @@
 #include <fmt/core.h>
 #include <memory>
 
+#include "helpers/error.cuh"
+#include "helpers/memory.cuh"
 #include "utils/graph.h"
 
-#define HANDLE_ERROR(error)                                     \
-    {                                                           \
-        if (error != cudaSuccess) {                             \
-            fprintf(stderr, "%s in %s at line %d\n",            \
-                cudaGetErrorString(error), __FILE__, __LINE__); \
-            exit(EXIT_FAILURE);                                 \
-        }                                                       \
-    }
+namespace gsg::cuda {
 
-namespace gsg {
+void bfs(const graph& input_host, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose);
 
-namespace cuda {
+void floyd_warshall(graph& input_host, uint block_size, bool verbose);
 
-    void bfs(const graph& input_host, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose);
-
-    void floyd_warshall(const graph& input_host, bool verbose);
-
-}
 }
