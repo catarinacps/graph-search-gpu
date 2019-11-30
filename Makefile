@@ -42,7 +42,7 @@ CC := g++ -std=c++17
 CUDAC := nvcc
 #	If DEBUG is defined (through command line), we'll turn on the debug flag and
 #	attach address sanitizer on the executables.
-DEBUGF := $(if $(DEBUG),-g -fsanitize=address)
+DEBUGF := $(if $(DEBUG),-g -fsanitize=address -fno-omit-frame-pointer)
 CFLAGS :=\
 	-Wall \
 	-Wextra \
@@ -72,7 +72,7 @@ SRC := $(shell find $(SRC_DIR) -mindepth 2 -name '*.cpp' | cut -d'/' -f2-)
 #	- Objects to be created:
 OBJ := $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(SRC))
 
-#	- CUDA objects
+#	- CUDA objects:
 CUDA := $(patsubst %.cu, $(OBJ_DIR)/%.o, $(shell find $(SRC_DIR) -mindepth 2 -name '*.cu' | cut -d'/' -f2-))
 
 ################################################################################

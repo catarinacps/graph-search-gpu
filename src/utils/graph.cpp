@@ -16,8 +16,9 @@ graph::graph(const graph& copy)
     , size(copy.size)
     , matrix(copy.size)
 {
+    std::memcpy(data, copy.data, copy.size * copy.size * sizeof(int));
     for (uint i = 0; i < this->size; i++)
-        std::memcpy(matrix[i], copy.matrix[i], this->size * sizeof(int));
+        matrix[i] = &data[i * this->size];
 }
 
 graph::~graph()
