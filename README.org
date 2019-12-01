@@ -53,10 +53,12 @@ tree -nd
 │   └── fmt
 ├── lib
 └── src
+    ├── fmt
     ├── methods
+    │   └── helpers
     └── utils
 
-10 directories
+12 directories
 #+end_example
 
 *** Ferramentas Utilizadas
@@ -97,19 +99,53 @@ No processo de compilação, são gerados dois binários:
 - cpu :: para a execução em CPU
 - gpu :: para a execução em GPU
 
-Dada compilação, primeiro é necessário adicionar à =LD_LIBRARY_PATH= a
-biblioteca compartilhada /fmt/:
+Verifique as opções de execução do binário conforme o seguinte comando:
 
 #+begin_src bash :exports both :results output
-export LD_LIBRARY_PATH+=:$(readlink -f lib)
+./build/gsg help
 #+end_src
 
-Após esse passo, verifique as opções de execução do binário desejado conforme o
-seguinte comando:
+Tal execução retornará as seguintes linhas:
 
-#+begin_src bash :exports both :results output
-./build/<binário> help
+#+begin_src bash :exports results :results output
+./build/gsg help
 #+end_src
+
+#+RESULTS:
+#+begin_example
+DESCRIPTION
+        finds an element in a graph using different methods
+        these methods are intended as a way of comparing the
+        different effectiveness in visiting a whole graph
+
+SYNOPSIS
+        ./build/gsg help
+        ./build/gsg [-v] cpu (bfs|floyd) [-s <VERTEX>] [-i <INITIAL>] <instance>
+        ./build/gsg [-v] cuda [-b <BLOCKSIZE>] (bfs|floyd) [-s <VERTEX>] [-i <INITIAL>] <instance>
+
+OPTIONS
+        -v, --verbose
+                    show detailed output
+
+        possible implementations
+            cpu     use the implementation in CPU host code
+            cuda    use the implementation in CUDA device code
+            -b, --block-size <BLOCKSIZE>
+                    the block size for the cuda version
+
+        possible methods:
+            bfs     use the BFS method to find the element
+            floyd   use the floyd-warshall method to find the element
+
+        -s, --search <VERTEX>
+                    the vertex being searched for (default: 5000)
+
+        -i, --initial <INITIAL>
+                    where to start from (default: 0)
+
+        <instance>  path to the graph instance
+
+#+end_example
 
 ** Contato
 
