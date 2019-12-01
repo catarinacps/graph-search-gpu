@@ -1,0 +1,227 @@
+# -*- org-export-babel-evaluate: nil -*-
+# -*- coding: utf-8 -*-
+# -*- mode: org -*-
+#+startup: beamer
+
+#+beamer_header: \title[Trabalho Prático 2]{Percorrimento e Processamento de Grafos em GPU}
+#+subtitle: /Arquiteturas Avançadas - INF01191/
+#+beamer_header: \author[Henrique Silva]{Henrique Corrêa Pereira da Silva\\Lucas Mello Schnorr (advisor)}
+#+email: hcpsilva@inf.ufrgs.br
+#+beamer_header: \institute{Instituto de Informática - UFRGS}
+#+date:
+
+#+latex_class: beamer
+#+latex_class_options: [serif,11pt]
+#+beamer_theme: UFRGS
+#+options: author:t title:nil H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+language: pt-br
+#+tags: noexport(n) ignore(i)
+#+export_exclude_tags: noexport
+#+export_select_tags: export
+#+latex_header: \usepackage{microtype}
+#+latex_header: \usepackage{mathtools}
+#+latex_header: \usepackage{palatino}
+#+latex_header: \usepackage{amssymb}
+#+latex_header: \usepackage{csquotes}
+#+latex_header: \usepackage{tikz}
+#+latex_header: \usepackage[absolute, overlay]{textpos}
+#+latex_header: \setlength{\TPHorizModule}{\paperwidth} % Textpos units
+#+latex_header: \setlength{\TPVertModule}{\paperwidth} % Textpos units
+#+latex_header: \usetikzlibrary{overlay-beamer-styles}  % Overlay effects for TikZ
+#+latex_header: \usemintedstyle{manni}
+
+* Preâmbulo                                                 :B_ignoreheading:
+:PROPERTIES:
+:BEAMER_env: ignoreheading
+:END:
+*** Context
+
+\vfill
+
+In the last few years, we saw the continuation of a decades long trend:
+ever-growing *parallelism* in search of performance
+
+\pause \vfill
+
+Also we saw that... \pause
+- the hardware naturally specialized over time \pause
+- buying highly performant systems became very expensive \pause
+- more common systems configurations became hard to extract their full potential
+
+\pause \vfill
+
+Applications running on them can no longer rely on homogeneous hardware if they
+seek /high performance/
+
+*** Agenda
+:PROPERTIES:
+:BEAMER_OPT: plain, noframenumbering
+:END:
+
+\tableofcontents
+
+* Introdução
+*** Agenda
+:PROPERTIES:
+:BEAMER_OPT: plain, noframenumbering
+:END:
+
+\tableofcontents[currentsubsection, sectionstyle=show/shaded]
+
+*** Implementations
+
+\vfill
+
+Most popular implementations seek to alleviate the burden of programmers
+
+\vfill \pause
+
+Of those implementations the most popular are: \pause
+
+- OpenMP
+- OpenMPI
+- OpenACC
+- etc..
+
+\vfill \pause
+
+**** Attention!
+
+If only utilizing the previously cited APIs, the domain decomposition is
+normally fixed to the number of resources \pause *you'll be victim to dynamic
+load imbalances*
+
+* Metodologia
+
+** Implementações realizadas
+
+*** Agenda
+:PROPERTIES:
+:BEAMER_OPT: plain, noframenumbering
+:END:
+
+\tableofcontents[currentsubsection, sectionstyle=show/shaded]
+
+*** Objeto de estudo
+
+\vfill
+
+A simple vector accumulation
+
+\vfill \pause
+
+#+attr_latex: :width 8.3cm
+[[./images/impl.pdf]]
+
+*** Example kernel
+
+\vfill
+
+#+attr_latex: :options fontsize=\scriptsize
+#+begin_src c :tangle no
+void reduc_sum(void** buffers, void* cl_arg)
+{
+    ullint* vec_input = (ullint*)STARPU_VECTOR_GET_PTR(buffers[0]);
+    ullint* output = (ullint*)STARPU_VARIABLE_GET_PTR(buffers[1]);
+    uint nx_input = STARPU_VECTOR_GET_NX(buffers[0]);
+
+    double t0 = get_time();
+
+    // do the job
+    for (uint i = 0; i < nx_input; i++)
+        *output += vec_input[i];
+
+    double t1 = get_time();
+
+    V_PRINTF("SUM = %d\n"
+             "Task finished work with elapsed time %f\n",
+        *output, t1 - t0);
+}
+#+end_src
+
+** Experimental validation
+
+*** Agenda
+:PROPERTIES:
+:BEAMER_OPT: plain, noframenumbering
+:END:
+
+\tableofcontents[currentsubsection, sectionstyle=show/shaded]
+
+*** Methodological approach
+
+\vfill
+
+A full factorial, randomly ordered experiment design
+
+\vfill \pause
+
+Parameters:
+- /Vector size/: =7*10^7, 3*10^8 and 1.1*10^9=
+- /Number of blocks/: =7000, 25000 and 82000=
+- /Reduction factor/: =2, 10 and 1000=
+
+* Results
+
+** Visualizations
+
+*** Agenda
+:PROPERTIES:
+:BEAMER_OPT: plain, noframenumbering
+:END:
+
+\tableofcontents[currentsubsection, sectionstyle=show/shaded]
+
+*** StarPU
+
+\vfill
+
+#+attr_latex: :height 8cm
+[[./images/all_parameters.png]]
+
+*** Combined graph
+
+\vfill
+
+#+attr_latex: :height 8cm
+[[./images/combined.png]]
+
+** Conclusions
+
+*** Agenda
+:PROPERTIES:
+:BEAMER_OPT: plain, noframenumbering
+:END:
+
+\tableofcontents[currentsubsection, sectionstyle=show/shaded]
+
+*** Feasibility
+
+\vfill
+
+Even with a simple implementation, we have shown that *StarPU* is a very capable
+API
+
+\vfill \pause
+
+Furthermore, we can aggregate the other APIs into our computation kernel \pause
+
+- OpenMP :: therefore, utilizing /parallel tasks/
+- OpenMPI :: distribute the execution graph across a whole cluster
+
+* Questions                                                 :B_ignoreheading:
+:PROPERTIES:
+:BEAMER_env: ignoreheading
+:END:
+
+\setbeamercolor{background canvas}{bg = uibgray}
+\title{Perguntas?}
+
+*** Obrigado                                                  :B_fullframe:
+:PROPERTIES:
+:BEAMER_OPT: b, plain, noframenumbering
+:BEAMER_env: fullframe
+:END:
+
+\titlepage
+\vspace*{1.3em}
