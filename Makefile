@@ -105,7 +105,7 @@ $(CUDA): $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cu
 all: $(TARGET)
 
 clean:
-	rm -rf $(OBJ_DIR)/* $(INC_DIR)/*~ $(TARGET) *~ *.o
+	rm -rf $(OBJ_DIR)/* $(INC_DIR)/*~ $(OUT_DIR)/* $(TARGET) *~ *.o
 
 redo: clean all
 
