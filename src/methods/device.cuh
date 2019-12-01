@@ -2,6 +2,7 @@
 
 #include <fmt/core.h>
 #include <memory>
+#include <utility>
 
 #include "helpers/error.cuh"
 #include "helpers/memory.cuh"
@@ -12,7 +13,10 @@ namespace gsg {
 
 namespace cuda {
 
-    bool bfs(const graph& input_host, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose);
+    // pair containing vertex num and num of connected edges
+    using node = std::pair<int, int>;
+
+    bool bfs(const graph& input, uint searched_vertex, uint initial_vertex, uint block_size, bool verbose);
 
     bool floyd_warshall(const graph& input_host, uint block_size, bool verbose);
 }

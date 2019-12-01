@@ -12,6 +12,7 @@ private:
 
 public:
     const uint32_t size;
+    uint32_t num_edges;
     std::vector<int*> matrix;
 
     /** Simple graph constructor.

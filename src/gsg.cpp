@@ -60,6 +60,7 @@ int main(int argc, char* argv[])
             if (selected_i == implementation::cpu) {
                 ret = gsg::cpu::bfs(*graph, searched_vertex, initial_vertex, verbose);
             } else {
+                ret = gsg::cuda::bfs(*graph, searched_vertex, initial_vertex, block_size, verbose);
             }
 
             if (verbose) {

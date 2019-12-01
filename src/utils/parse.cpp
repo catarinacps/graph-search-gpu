@@ -16,6 +16,7 @@ std::unique_ptr<graph> parse_file(const std::string& path)
     while (file >> pos_a >> pos_b >> weight) {
         read_graph->matrix[pos_a][pos_b] = weight;
         read_graph->matrix[pos_b][pos_a] = weight;
+        read_graph->num_edges++;
     }
 
     return read_graph;
