@@ -30,6 +30,27 @@
 #+latex_header: \usetikzlibrary{overlay-beamer-styles}  % Overlay effects for TikZ
 #+latex_header: \usemintedstyle{manni}
 
+* Notas e comentários                                              :noexport:
+
+Então, pensei em deixar uma introdução direto ao ponto e polêmica, pra chamar
+atenção mesmo. Nela, falar de como isso é uma area de pesquisa ativa e os
+principais problemas ou diferentes maneiras existentes de abordar o
+problema. Quero falar sobre como o ambiente não é trivial de se iniciar e que o
+know-how mínimo pra trabalhar nisso é considerável pra graduação. E xingar o
+código que nos foi passado.
+
+Depois disso, mostrar os kernels (parte importante). Também mostrar interface
+porque ficou bonita.
+
+Metodologia de experimentação e fatores analisados, fora os parametros
+experimentais.
+
+Graficos, eixos juntos e no 0, mostrar média e erro padrão.
+
+Conclusão, area de trabalho muito importante e interessante, porém não
+trivial. Citar também como uma implementação naive deu ganhos
+consideráveis. Colocar no fim a bibliografia.
+
 * Preâmbulo                                                 :B_ignoreheading:
 :PROPERTIES:
 :BEAMER_env: ignoreheading
@@ -51,7 +72,7 @@ Also we saw that... \pause
 \pause \vfill
 
 Applications running on them can no longer rely on homogeneous hardware if they
-seek /high performance/
+seek /high performance/. teste! \cite{shi2018survey}
 
 *** Agenda
 :PROPERTIES:
@@ -209,12 +230,12 @@ Furthermore, we can aggregate the other APIs into our computation kernel \pause
 - OpenMP :: therefore, utilizing /parallel tasks/
 - OpenMPI :: distribute the execution graph across a whole cluster
 
-* Questions                                                 :B_ignoreheading:
+* Perguntas                                                 :B_ignoreheading:
 :PROPERTIES:
 :BEAMER_env: ignoreheading
 :END:
 
-\setbeamercolor{background canvas}{bg = uibgray}
+\setbeamercolor{background canvas}{bg = ufrgsgray}
 \title{Perguntas?}
 
 *** Obrigado                                                  :B_fullframe:
@@ -225,3 +246,41 @@ Furthermore, we can aggregate the other APIs into our computation kernel \pause
 
 \titlepage
 \vspace*{1.3em}
+
+* Bibliografia                                              :B_ignoreheading:
+:PROPERTIES:
+:BEAMER_env: ignoreheading
+:END:
+
+\setbeamercolor{background canvas}{bg = white}
+
+*** Bibliografia
+
+\bibliographystyle{apalike}
+\scriptsize
+\bibliography{refs}
+
+* BibTeX                                                           :noexport:
+
+#+begin_src bib :tangle refs.bib
+@article{shi2018survey,
+ author = {Shi, Xuanhua and Zheng, Zhigao and Zhou, Yongluan and Jin, Hai and He, Ligang and Liu, Bo and Hua, Qiang-Sheng},
+ title = {Graph Processing on GPUs: A Survey},
+ journal = {ACM Comput. Surv.},
+ issue_date = {January 2018},
+ volume = {50},
+ number = {6},
+ month = jan,
+ year = {2018},
+ issn = {0360-0300},
+ pages = {81:1--81:35},
+ articleno = {81},
+ numpages = {35},
+ url = {http://doi.acm.org/10.1145/3128571},
+ doi = {10.1145/3128571},
+ acmid = {3128571},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {BSP model, GAS model, GPU, Graph processing, graph datasets, parallelism},
+}
+#+end_src
