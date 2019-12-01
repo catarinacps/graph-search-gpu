@@ -88,7 +88,14 @@ namespace cuda {
 
             h_graph_nodes[i].second = connected_edges;
             h_graph_nodes[i].first = i;
+            h_graph_mask[i] = false;
+            h_updating_graph_mask[i] = false;
+            h_graph_visited[i] = false;
         }
+
+        //set the source node as true in the mask
+        h_graph_mask[initial_vertex] = true;
+        h_graph_visited[initial_vertex] = true;
 
         node* d_graph_nodes;
         HANDLE_ERROR(cudaMalloc((void**)&d_graph_nodes, sizeof(node) * input.size));
@@ -128,10 +135,9 @@ namespace cuda {
         auto initial_time = get_time();
 
         int k = 0;
-        bool stop;
+        bool stop = false;
 
         do {
-            stop = false;
             HANDLE_ERROR(cudaMemcpy(d_over, &stop, sizeof(bool), cudaMemcpyHostToDevice));
             bfs_kernel_1<<<grid, threads, 0>>>(d_graph_nodes, d_graph_edges, d_graph_mask, d_updating_graph_mask, d_graph_visited, d_cost, input.size);
 
@@ -139,7 +145,7 @@ namespace cuda {
 
             HANDLE_ERROR(cudaMemcpy(&stop, d_over, sizeof(bool), cudaMemcpyDeviceToHost));
             k++;
-        } while (stop);
+        } while (!stop);
 
         HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaDeviceSynchronize());
