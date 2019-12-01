@@ -6,6 +6,7 @@
 #include "helpers/error.cuh"
 #include "helpers/memory.cuh"
 #include "utils/graph.h"
+#include "utils/utils.h"
 
 namespace gsg {
 

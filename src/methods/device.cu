@@ -37,16 +37,20 @@ namespace cuda {
         int* device_ptr;
         auto pitch = move_to_device(input_host, &device_ptr);
 
+        auto initial_time = get_time();
+
         cudaFuncSetCacheConfig(fw_kernel, cudaFuncCachePreferL1);
 
         for (int vertex = 0; vertex < n_vertex; ++vertex) {
             fw_kernel<<<dim_grid, dim_block>>>(vertex, pitch / sizeof(int), n_vertex, device_ptr);
         }
 
-        graph ret_graph(input_host.size);
-
         HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaDeviceSynchronize());
+
+        fmt::print("time: {}", get_time() - initial_time);
+
+        graph ret_graph(input_host.size);
         move_from_device(ret_graph, device_ptr, pitch);
 
         return true;
