@@ -141,6 +141,9 @@ namespace cuda {
             k++;
         } while (stop);
 
+        HANDLE_ERROR(cudaGetLastError());
+        HANDLE_ERROR(cudaDeviceSynchronize());
+
         fmt::print("time: {}", get_time() - initial_time);
 
         free(h_graph_nodes);
