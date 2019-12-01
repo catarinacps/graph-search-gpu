@@ -21,7 +21,10 @@ namespace cuda {
         }
     }
 
-    bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose);
+    bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose)
+    {
+        return true;
+    }
 
     bool floyd_warshall(const graph& input_host, uint block_size, bool verbose)
     {
@@ -34,15 +37,15 @@ namespace cuda {
         dim3 dim_grid((n_vertex - 1) / block_size + 1, (n_vertex - 1) / block_size + 1, 1);
         dim3 dim_block(block_size, block_size, 1);
 
-        int* device_ptr;
-        auto pitch = move_to_device(input_host, &device_ptr);
+        int* d_matrix;
+        auto pitch = move_to_device(input_host, &d_matrix);
 
         auto initial_time = get_time();
 
         cudaFuncSetCacheConfig(fw_kernel, cudaFuncCachePreferL1);
 
         for (int vertex = 0; vertex < n_vertex; ++vertex) {
-            fw_kernel<<<dim_grid, dim_block>>>(vertex, pitch / sizeof(int), n_vertex, device_ptr);
+            fw_kernel<<<dim_grid, dim_block>>>(vertex, pitch / sizeof(int), n_vertex, d_matrix);
         }
 
         HANDLE_ERROR(cudaGetLastError());
@@ -51,7 +54,9 @@ namespace cuda {
         fmt::print("time: {}", get_time() - initial_time);
 
         graph ret_graph(input_host.size);
-        move_from_device(ret_graph, device_ptr, pitch);
+        move_from_device(ret_graph, d_matrix, pitch);
+
+        cudaFree(d_matrix);
 
         return true;
     }

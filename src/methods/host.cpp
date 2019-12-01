@@ -2,10 +2,10 @@
 
 namespace gsg::cpu {
 
-bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose)
+bool bfs(const graph& input, uint searched_vertex, uint initial_vertex, bool verbose)
 {
     std::vector<bool> visited(input.size, false);
-    std::queue<uint32_t> order;
+    std::queue<uint> order;
 
     order.push(initial_vertex);
     visited[initial_vertex] = true;
@@ -28,7 +28,7 @@ bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, 
             return true;
         }
 
-        for (uint32_t vertex = 0, edge; vertex < input.size; ++vertex) {
+        for (uint vertex = 0, edge; vertex < input.size; ++vertex) {
             edge = input.matrix[current_vertex][vertex];
 
             if (vertex != current_vertex and edge != 0) {
