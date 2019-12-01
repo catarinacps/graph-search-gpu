@@ -25,42 +25,39 @@ namespace cuda {
         }
     }
 
-    static __global__ void bfs_kernel_1(
-        node* g_graph_nodes,
-        int* g_graph_edges,
-        bool* g_graph_mask,
-        bool* g_updating_graph_mask,
-        bool* g_graph_visited,
-        int* g_cost,
-        int no_of_nodes)
+    static __global__ void bfs_kernel(
+        node* Va,
+        int* Ea,
+        bool* Fa,
+        bool* Xa,
+        int* Ca,
+        int num_nodes,
+        bool* done)
     {
-        int tid = blockIdx.x * 512 + threadIdx.x;
-        if (tid < no_of_nodes && g_graph_mask[tid]) {
-            g_graph_mask[tid] = false;
-            for (int i = g_graph_nodes[tid].first; i < (g_graph_nodes[tid].second + g_graph_nodes[tid].first); i++) {
-                int id = g_graph_edges[i];
-                if (!g_graph_visited[id]) {
-                    g_cost[id] = g_cost[tid] + 1;
-                    g_updating_graph_mask[id] = true;
+
+        int id = threadIdx.x + blockIdx.x * blockDim.x;
+
+        if (id > num_nodes)
+            *done = false;
+
+        if (Fa[id] == true && Xa[id] == false) {
+            printf("%d ", id); //This printf gives the order of vertices in BFS
+            Fa[id] = false;
+            Xa[id] = true;
+            __syncthreads();
+            int k = 0;
+            int i;
+            int start = Va[id].first;
+            int end = start + Va[id].second;
+            for (int i = start; i < end; i++) {
+                int nid = Ea[i];
+
+                if (Xa[nid] == false) {
+                    Ca[nid] = Ca[id] + 1;
+                    Fa[nid] = true;
+                    *done = false;
                 }
             }
-        }
-    }
-
-    static __global__ void bfs_kernel_2(
-        bool* g_graph_mask,
-        bool* g_updating_graph_mask,
-        bool* g_graph_visited,
-        bool* g_over,
-        int no_of_nodes)
-    {
-        int tid = blockIdx.x * 512 + threadIdx.x;
-        if (tid < no_of_nodes && g_updating_graph_mask[tid]) {
-
-            g_graph_mask[tid] = true;
-            g_graph_visited[tid] = true;
-            *g_over = true;
-            g_updating_graph_mask[tid] = false;
         }
     }
 
@@ -70,11 +67,29 @@ namespace cuda {
 
         int num_blocks = (int)ceil(input.size / (double)block_size);
 
-        node* h_graph_nodes = (node*)calloc(input.size, sizeof(node));
-        bool* h_graph_mask = (bool*)calloc(input.size, sizeof(bool));
-        bool* h_updating_graph_mask = (bool*)calloc(input.size, sizeof(bool));
-        bool* h_graph_visited = (bool*)calloc(input.size, sizeof(bool));
-        int* h_graph_edges = (int*)calloc(2 * input.num_edges, sizeof(int));
+        node* h_nodes = (node*)calloc(input.size, sizeof(node));
+        int* h_edges = (int*)calloc(input.num_edges, sizeof(int));
+        bool* h_frontier = (bool*)calloc(input.size, sizeof(bool));
+        bool* h_visited = (bool*)calloc(input.size, sizeof(bool));
+        int* h_cost = (int*)calloc(input.size, sizeof(int));
+
+        h_frontier[initial_vertex] = true;
+
+        node* Va;
+        HANDLE_ERROR(cudaMalloc((void**)&Va, sizeof(node) * input.size));
+        HANDLE_ERROR(cudaMemcpy(Va, h_nodes, sizeof(node) * input.size, cudaMemcpyHostToDevice));
+        int* Ea;
+        HANDLE_ERROR(cudaMalloc((void**)&Ea, sizeof(node) * input.size));
+        HANDLE_ERROR(cudaMemcpy(Ea, h_edges, sizeof(node) * input.size, cudaMemcpyHostToDevice));
+        bool* Fa;
+        HANDLE_ERROR(cudaMalloc((void**)&Fa, sizeof(bool) * input.size));
+        HANDLE_ERROR(cudaMemcpy(Fa, h_frontier, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
+        bool* Xa;
+        HANDLE_ERROR(cudaMalloc((void**)&Xa, sizeof(bool) * input.size));
+        HANDLE_ERROR(cudaMemcpy(Xa, h_visited, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
+        int* Ca;
+        HANDLE_ERROR(cudaMalloc((void**)&Ca, sizeof(int) * input.size));
+        HANDLE_ERROR(cudaMemcpy(Ca, h_cost, sizeof(int) * input.size, cudaMemcpyHostToDevice));
 
         uint edge_index = 0;
         for (uint i = 0; i < input.size; i++) {
@@ -82,49 +97,15 @@ namespace cuda {
             for (uint j = 0; j < input.size; j++) {
                 if (input.matrix[i][j] != 0) {
                     connected_edges++;
-                    h_graph_edges[edge_index++] = j;
+                    h_edges[edge_index++] = j;
                 }
             }
 
-            h_graph_nodes[i].second = connected_edges;
-            h_graph_nodes[i].first = i;
-            h_graph_mask[i] = false;
-            h_updating_graph_mask[i] = false;
-            h_graph_visited[i] = false;
+            h_nodes[i].first = i;
+            h_nodes[i].second = connected_edges;
+            h_frontier[i] = false;
+            h_visited[i] = false;
         }
-
-        //set the source node as true in the mask
-        h_graph_mask[initial_vertex] = true;
-        h_graph_visited[initial_vertex] = true;
-
-        node* d_graph_nodes;
-        HANDLE_ERROR(cudaMalloc((void**)&d_graph_nodes, sizeof(node) * input.size));
-        HANDLE_ERROR(cudaMemcpy(d_graph_nodes, h_graph_nodes, sizeof(node) * input.size, cudaMemcpyHostToDevice));
-
-        int* d_graph_edges;
-        HANDLE_ERROR(cudaMalloc((void**)&d_graph_edges, sizeof(int) * input.num_edges));
-        HANDLE_ERROR(cudaMemcpy(d_graph_edges, h_graph_edges, sizeof(int) * input.num_edges, cudaMemcpyHostToDevice));
-
-        bool* d_graph_mask;
-        HANDLE_ERROR(cudaMalloc((void**)&d_graph_mask, sizeof(bool) * input.size));
-        HANDLE_ERROR(cudaMemcpy(d_graph_mask, h_graph_mask, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
-
-        bool* d_updating_graph_mask;
-        HANDLE_ERROR(cudaMalloc((void**)&d_updating_graph_mask, sizeof(bool) * input.size));
-        HANDLE_ERROR(cudaMemcpy(d_updating_graph_mask, h_updating_graph_mask, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
-
-        bool* d_graph_visited;
-        HANDLE_ERROR(cudaMalloc((void**)&d_graph_visited, sizeof(bool) * input.size));
-        HANDLE_ERROR(cudaMemcpy(d_graph_visited, h_graph_visited, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
-
-        int* h_cost = (int*)malloc(sizeof(int) * input.size);
-        for (int i = 0; i < input.size; i++)
-            h_cost[i] = -1;
-        h_cost[initial_vertex] = 0;
-
-        int* d_cost;
-        HANDLE_ERROR(cudaMalloc((void**)&d_cost, sizeof(int) * input.size));
-        HANDLE_ERROR(cudaMemcpy(d_cost, h_cost, sizeof(int) * input.size, cudaMemcpyHostToDevice));
 
         bool* d_over;
         HANDLE_ERROR(cudaMalloc((void**)&d_over, sizeof(bool)));
@@ -135,15 +116,15 @@ namespace cuda {
         auto initial_time = get_time();
 
         int k = 0;
-        bool stop = false;
+        bool stop;
 
         do {
+            stop = true;
+
             HANDLE_ERROR(cudaMemcpy(d_over, &stop, sizeof(bool), cudaMemcpyHostToDevice));
-            bfs_kernel_1<<<grid, threads, 0>>>(d_graph_nodes, d_graph_edges, d_graph_mask, d_updating_graph_mask, d_graph_visited, d_cost, input.size);
-
-            bfs_kernel_2<<<grid, threads, 0>>>(d_graph_mask, d_updating_graph_mask, d_graph_visited, d_over, input.size);
-
+            bfs_kernel<<<grid, threads>>>(Va, Ea, Fa, Xa, Ca, input.size, d_over);
             HANDLE_ERROR(cudaMemcpy(&stop, d_over, sizeof(bool), cudaMemcpyDeviceToHost));
+
             k++;
         } while (!stop);
 
@@ -152,18 +133,17 @@ namespace cuda {
 
         fmt::print("time: {}", get_time() - initial_time);
 
-        free(h_graph_nodes);
-        free(h_graph_edges);
-        free(h_graph_mask);
-        free(h_updating_graph_mask);
-        free(h_graph_visited);
+        free(h_nodes);
+        free(h_edges);
+        free(h_frontier);
+        free(h_visited);
         free(h_cost);
-        HANDLE_ERROR(cudaFree(d_graph_nodes));
-        HANDLE_ERROR(cudaFree(d_graph_edges));
-        HANDLE_ERROR(cudaFree(d_graph_mask));
-        HANDLE_ERROR(cudaFree(d_updating_graph_mask));
-        HANDLE_ERROR(cudaFree(d_graph_visited));
-        HANDLE_ERROR(cudaFree(d_cost));
+        HANDLE_ERROR(cudaFree(Va));
+        HANDLE_ERROR(cudaFree(Ea));
+        HANDLE_ERROR(cudaFree(Fa));
+        HANDLE_ERROR(cudaFree(Xa));
+        HANDLE_ERROR(cudaFree(Ca));
+        HANDLE_ERROR(cudaFree(d_over));
 
         return true;
     }
