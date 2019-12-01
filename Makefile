@@ -37,10 +37,15 @@ INC_EXTRA :=
 #	Default CUDA path, define it through the shell to something else if needed
 CUDA_PATH ?= /opt/cuda
 
+#	Some plataforms don't have clang
+CUDA_OPT ?= CLANG
+CUDAC_NVIDIA := nvcc -x cu -arch=sm_35
+CUDAC_CLANG := clang++ -std=c++17 -x cuda --cuda-path=$(CUDA_PATH) --cuda-gpu-arch=sm_35
+
 #	- Compilation flags:
 #	Compiler and language version
 CC := g++ -std=c++17
-CUDAC ?= clang++ -std=c++17 -x cuda --cuda-path=$(CUDA_PATH) --cuda-gpu-arch=sm_35
+CUDAC := $(CUDAC_$(CUDA_OPT))
 #	If DEBUG is defined (through command line), we'll turn on the debug flag and
 #	attach address sanitizer on the executables.
 DEBUGF := $(if $(DEBUG),-g -fsanitize=address -fno-omit-frame-pointer)
@@ -52,7 +57,6 @@ CFLAGS :=\
 	-Wunreachable-code
 OPT := $(if $(DEBUG),-O0,-O3 -march=native)
 LIB := -L$(LIB_DIR) -L$(CUDA_PATH)/lib64 $(LIB_EXTRA) \
-	-lfmt \
 	-lcudart \
 	-lcudadevrt
 INC := -I$(INC_DIR) -I$(SRC_DIR) $(INC_EXTRA)

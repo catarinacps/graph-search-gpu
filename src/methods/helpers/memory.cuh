@@ -5,10 +5,13 @@
 #include "error.cuh"
 #include "utils/graph.h"
 
-namespace gsg::cuda {
+namespace gsg {
 
-size_t move_to_device(const graph& input, int** device);
+namespace cuda {
 
-void move_from_device(graph& input, int* device, size_t pitch);
+    size_t move_to_device(const graph& input, int** device);
+
+    void move_from_device(graph& input, int* device, size_t pitch);
+}
 
 }

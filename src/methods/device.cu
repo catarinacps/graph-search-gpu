@@ -1,49 +1,56 @@
 #include "device.cuh"
 
-namespace gsg::cuda {
+namespace gsg {
 
-static __global__
-void fw_kernel(int const u, size_t pitch, int const n_vertex, int* const graph)
-{
-    int x = blockDim.x * blockIdx.x + threadIdx.x;
-    int y = blockDim.y * blockIdx.y + threadIdx.y;
+namespace cuda {
 
-    if (y < n_vertex && x < n_vertex) {
-        int indexYX = y * pitch + x;
-        int indexUX = u * pitch + x;
+    static __global__ void fw_kernel(int const u, size_t pitch, int const n_vertex, int* const graph)
+    {
+        int x = blockDim.x * blockIdx.x + threadIdx.x;
+        int y = blockDim.y * blockIdx.y + threadIdx.y;
 
-        int new_path = graph[y * pitch + u] + graph[indexUX];
-        int old_path = graph[indexYX];
+        if (y < n_vertex && x < n_vertex) {
+            int indexYX = y * pitch + x;
+            int indexUX = u * pitch + x;
 
-        if (old_path > new_path)
-            graph[indexYX] = new_path;
+            int new_path = graph[y * pitch + u] + graph[indexUX];
+            int old_path = graph[indexYX];
+
+            if (old_path > new_path)
+                graph[indexYX] = new_path;
+        }
+    }
+
+    bool bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose);
+
+    bool floyd_warshall(const graph& input_host, uint block_size, bool verbose)
+    {
+        // int num_gpus;
+        // HANDLE_ERROR(cudaGetDeviceCount(&num_gpus));
+        HANDLE_ERROR(cudaSetDevice(0));
+
+        auto n_vertex = input_host.size;
+
+        dim3 dim_grid((n_vertex - 1) / block_size + 1, (n_vertex - 1) / block_size + 1, 1);
+        dim3 dim_block(block_size, block_size, 1);
+
+        int* device_ptr;
+        auto pitch = move_to_device(input_host, &device_ptr);
+
+        cudaFuncSetCacheConfig(fw_kernel, cudaFuncCachePreferL1);
+
+        for (int vertex = 0; vertex < n_vertex; ++vertex) {
+            fw_kernel<<<dim_grid, dim_block>>>(vertex, pitch / sizeof(int), n_vertex, device_ptr);
+        }
+
+        graph ret_graph(input_host.size);
+
+        HANDLE_ERROR(cudaGetLastError());
+        HANDLE_ERROR(cudaDeviceSynchronize());
+        move_from_device(ret_graph, device_ptr, pitch);
+
+        return true;
     }
 }
 
-void bfs(const graph& input, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose);
-
-void floyd_warshall(graph& input_host, uint block_size, bool verbose)
-{
-    // int num_gpus;
-    // HANDLE_ERROR(cudaGetDeviceCount(&num_gpus));
-    HANDLE_ERROR(cudaSetDevice(0));
-
-    auto n_vertex = input_host.size;
-
-    dim3 dim_grid((n_vertex - 1) / block_size + 1, (n_vertex - 1) / block_size + 1, 1);
-    dim3 dim_block(block_size, block_size, 1);
-
-    int* device;
-    auto pitch = move_to_device(input_host, &device);
-
-    cudaFuncSetCacheConfig(fw_kernel, cudaFuncCachePreferL1);
-
-    for (int vertex = 0; vertex < n_vertex; ++vertex) {
-        fw_kernel<<<dim_grid, dim_block>>>(vertex, pitch / sizeof(int), n_vertex, device);
-    }
-
-    HANDLE_ERROR(cudaGetLastError());
-    HANDLE_ERROR(cudaDeviceSynchronize());
-    move_from_device(input_host, device, pitch);
-}
 }

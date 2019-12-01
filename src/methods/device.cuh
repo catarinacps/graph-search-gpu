@@ -7,10 +7,13 @@
 #include "helpers/memory.cuh"
 #include "utils/graph.h"
 
-namespace gsg::cuda {
+namespace gsg {
 
-void bfs(const graph& input_host, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose);
+namespace cuda {
 
-void floyd_warshall(graph& input_host, uint block_size, bool verbose);
+    bool bfs(const graph& input_host, uint32_t searched_vertex, uint32_t initial_vertex, bool verbose);
+
+    bool floyd_warshall(const graph& input_host, uint block_size, bool verbose);
+}
 
 }

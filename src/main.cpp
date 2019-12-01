@@ -26,6 +26,7 @@ enum class imp {
 int main(int argc, char* argv[])
 {
     uint32_t searched_vertex = 5000, initial_vertex = 0;
+    uint block_size = 32;
     auto selected_m = method::help;
     auto selected_i = imp::cpu;
     bool verbose = false;
@@ -36,7 +37,8 @@ int main(int argc, char* argv[])
 
     auto implementations = "possible implementations" % (
         command("cpu").set(selected_i, imp::cpu) % "use the implementation in CPU host code" |
-        command("cuda").set(selected_i, imp::cuda) % "use the implementation in CUDA device code");
+        (command("cuda").set(selected_i, imp::cuda) % "use the implementation in CUDA device code",
+         (option("-b", "--block-size") & value("BLOCKSIZE", block_size)) % "the block size for the cuda version"));
 
     auto methods = (
         (command("bfs").set(selected_m, method::bfs) % "use the BFS method to find the element" |
@@ -79,7 +81,7 @@ int main(int argc, char* argv[])
             if (selected_i == imp::cpu) {
                 ret = gsg::cpu::floyd_warshall(*graph, verbose);
             } else {
-                gsg::cuda::floyd_warshall(*graph, 32, verbose);
+                ret = gsg::cuda::floyd_warshall(*graph, block_size, verbose);
             }
 
             if (verbose) {
