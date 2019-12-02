@@ -128,7 +128,7 @@ namespace cuda {
             k++;
         } while (!stop);
 
-        HANDLE_ERROR(cudaGetLastError());
+        // HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaDeviceSynchronize());
 
         fmt::print("time: {}", get_time() - initial_time);
@@ -180,7 +180,7 @@ namespace cuda {
             fw_kernel<<<dim_grid, dim_block>>>(vertex, pitch / sizeof(int), n_vertex, d_matrix);
         }
 
-        HANDLE_ERROR(cudaGetLastError());
+        // HANDLE_ERROR(cudaGetLastError());
         HANDLE_ERROR(cudaDeviceSynchronize());
 
         fmt::print("time: {}", get_time() - initial_time);

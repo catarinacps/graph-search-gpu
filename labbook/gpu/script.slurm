@@ -8,7 +8,7 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=hcpsilva@inf.ufrgs.br
 
-set -euo pipefail
+set -euxo pipefail
 
 HOST=$(hostname)
 
