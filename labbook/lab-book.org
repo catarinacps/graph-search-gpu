@@ -156,16 +156,22 @@ E agora plotando:
 
 #+begin_src R :session :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 600 :height 400
 df %>%
-  ggplot(aes(x = as.factor(instance), y = time)) +
+  mutate(metfac = as.factor(method)) %>%
+  ggplot(aes(x = as.factor(instance), y = time, fill = metfac, color = metfac)) +
   stat_boxplot(geom = 'errorbar', width = 0.2) +
-  geom_boxplot(width = 0.2, fill = method, position = position_dodge(width = .325)) +
-  stat_summary(fun.y = mean, geom = "point", size = 2, color = "white", position = position_dodge(width = .325)) +
+  geom_boxplot(width = 0.2, position = position_dodge(width = .325)) +
+  stat_summary(fun.y = mean, geom = "point", size = 2, color = "red", position = position_dodge(width = .325)) +
   ylim(0, NA) +
+  scale_fill_discrete(name = "Método utilizado") +
+  scale_color_discrete(name = "Método utilizado") +
   scale_y_continuous(breaks = scales::pretty_breaks(n = 6)) +
-  labs(x = "Instancia de teste", y = "Tempo (segundos)") +
+  labs(x = "Instância de teste",
+       y = "Tempo (segundos)",
+       title = "Tempo de execução em CPU") +
   theme_bw() +
   theme(text = element_text(family = "Palatino", size = 16),
-        axis.text.x = element_text(angle = 45, vjust = 0.6))
+        axis.text.x = element_text(angle = 45, vjust = 0.6),
+        legend.position = "top")
 #+end_src
 
 * Em GPU
