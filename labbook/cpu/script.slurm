@@ -37,7 +37,7 @@ mkdir $EXP_NAME
 pushd $EXP_NAME
 
 # set out chosen cuda path version
-CUDA_INTALLATION=/usr/local/cuda-10.1
+CUDA_INSTALLATION=/usr/local/cuda-10.1
 
 # update env vars
 LD_LIBRARY_PATH+=:${CUDA_INSTALLATION}/lib64
