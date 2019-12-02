@@ -70,22 +70,6 @@ namespace cuda {
 
         h_frontier[initial_vertex] = true;
 
-        node* Va;
-        HANDLE_ERROR(cudaMalloc((void**)&Va, sizeof(node) * input.size));
-        HANDLE_ERROR(cudaMemcpy(Va, h_nodes, sizeof(node) * input.size, cudaMemcpyHostToDevice));
-        uint* Ea;
-        HANDLE_ERROR(cudaMalloc((void**)&Ea, sizeof(uint) * 2 * input.num_edges));
-        HANDLE_ERROR(cudaMemcpy(Ea, h_edges, sizeof(uint) * 2 * input.num_edges, cudaMemcpyHostToDevice));
-        bool* Fa;
-        HANDLE_ERROR(cudaMalloc((void**)&Fa, sizeof(bool) * input.size));
-        HANDLE_ERROR(cudaMemcpy(Fa, h_frontier, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
-        bool* Xa;
-        HANDLE_ERROR(cudaMalloc((void**)&Xa, sizeof(bool) * input.size));
-        HANDLE_ERROR(cudaMemcpy(Xa, h_visited, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
-        int* Ca;
-        HANDLE_ERROR(cudaMalloc((void**)&Ca, sizeof(int) * input.size));
-        HANDLE_ERROR(cudaMemcpy(Ca, h_cost, sizeof(int) * input.size, cudaMemcpyHostToDevice));
-
         uint edge_index = 0;
         for (uint i = 0; i < input.size; i++) {
             uint connected_edges = 0;
@@ -101,6 +85,26 @@ namespace cuda {
             h_frontier[i] = false;
             h_visited[i] = false;
         }
+
+        for (uint i = 0; i < input.size; i++)
+            if (input.matrix[initial_vertex][i] != 0)
+                h_frontier[i] = true;
+
+        node* Va;
+        HANDLE_ERROR(cudaMalloc((void**)&Va, sizeof(node) * input.size));
+        HANDLE_ERROR(cudaMemcpy(Va, h_nodes, sizeof(node) * input.size, cudaMemcpyHostToDevice));
+        uint* Ea;
+        HANDLE_ERROR(cudaMalloc((void**)&Ea, sizeof(uint) * 2 * input.num_edges));
+        HANDLE_ERROR(cudaMemcpy(Ea, h_edges, sizeof(uint) * 2 * input.num_edges, cudaMemcpyHostToDevice));
+        bool* Fa;
+        HANDLE_ERROR(cudaMalloc((void**)&Fa, sizeof(bool) * input.size));
+        HANDLE_ERROR(cudaMemcpy(Fa, h_frontier, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
+        bool* Xa;
+        HANDLE_ERROR(cudaMalloc((void**)&Xa, sizeof(bool) * input.size));
+        HANDLE_ERROR(cudaMemcpy(Xa, h_visited, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
+        int* Ca;
+        HANDLE_ERROR(cudaMalloc((void**)&Ca, sizeof(int) * input.size));
+        HANDLE_ERROR(cudaMemcpy(Ca, h_cost, sizeof(int) * input.size, cudaMemcpyHostToDevice));
 
         bool* d_over;
         HANDLE_ERROR(cudaMalloc((void**)&d_over, sizeof(bool)));
