@@ -63,7 +63,7 @@ namespace cuda {
         int num_blocks = (int)ceil(input.size / (double)block_size);
 
         node* h_nodes = (node*)calloc(input.size, sizeof(node));
-        uint* h_edges = (uint*)calloc(input.num_edges, sizeof(uint));
+        uint* h_edges = (uint*)calloc(2 * input.num_edges, sizeof(uint));
         bool* h_frontier = (bool*)calloc(input.size, sizeof(bool));
         bool* h_visited = (bool*)calloc(input.size, sizeof(bool));
         int* h_cost = (int*)calloc(input.size, sizeof(int));
@@ -74,8 +74,8 @@ namespace cuda {
         HANDLE_ERROR(cudaMalloc((void**)&Va, sizeof(node) * input.size));
         HANDLE_ERROR(cudaMemcpy(Va, h_nodes, sizeof(node) * input.size, cudaMemcpyHostToDevice));
         int* Ea;
-        HANDLE_ERROR(cudaMalloc((void**)&Ea, sizeof(uint) * input.size));
-        HANDLE_ERROR(cudaMemcpy(Ea, h_edges, sizeof(uint) * input.size, cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaMalloc((void**)&Ea, sizeof(uint) * 2 * input.num_edges));
+        HANDLE_ERROR(cudaMemcpy(Ea, h_edges, sizeof(uint) * 2 * input.num_edges, cudaMemcpyHostToDevice));
         bool* Fa;
         HANDLE_ERROR(cudaMalloc((void**)&Fa, sizeof(bool) * input.size));
         HANDLE_ERROR(cudaMemcpy(Fa, h_frontier, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
@@ -105,6 +105,10 @@ namespace cuda {
         bool* d_over;
         HANDLE_ERROR(cudaMalloc((void**)&d_over, sizeof(bool)));
 
+        uint* d_num_nodes;
+        HANDLE_ERROR(cudaMalloc((void**)&d_num_nodes, sizeof(uint)));
+        HANDLE_ERROR(cudaMemcpy(d_num_nodes, &input.size, sizeof(uint), cudaMemcpyHostToDevice));
+
         dim3 grid(num_blocks, 1, 1);
         dim3 threads(block_size, 1, 1);
 
@@ -117,7 +121,7 @@ namespace cuda {
             stop = true;
 
             HANDLE_ERROR(cudaMemcpy(d_over, &stop, sizeof(bool), cudaMemcpyHostToDevice));
-            bfs_kernel<<<grid, threads>>>(Va, Ea, Fa, Xa, Ca, input.size, d_over);
+            bfs_kernel<<<grid, threads>>>(Va, Ea, Fa, Xa, Ca, *d_num_nodes, d_over);
             HANDLE_ERROR(cudaMemcpy(&stop, d_over, sizeof(bool), cudaMemcpyDeviceToHost));
 
             k++;
