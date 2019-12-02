@@ -256,7 +256,7 @@ echo "id,method,instance,block_size,time" > $results_csv
 
 # math solver
 while read -r id method instance block_size; do
-    csv_line=${id},${method},${instance},${}
+    csv_line=${id},${method},${instance},${block_size}
 
     echo
     echo "--> Running with params: $id $method $instance $block_size"
