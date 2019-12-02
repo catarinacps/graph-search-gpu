@@ -36,10 +36,9 @@ namespace cuda {
     {
         int id = threadIdx.x + blockIdx.x * blockDim.x;
 
-        if (id > num_nodes)
+        if (id >= num_nodes) {
             *done = false;
-
-        if (*done && Fa[id] == true && Xa[id] == false) {
+        } else if (Fa[id] == true && Xa[id] == false) {
             printf("%d ", id); //This printf gives the order of vertices in BFS
             Fa[id] = false;
             Xa[id] = true;
