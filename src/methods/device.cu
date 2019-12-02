@@ -26,27 +26,24 @@ namespace cuda {
     }
 
     static __global__ void bfs_kernel(
-        node* Va,
-        int* Ea,
-        bool* Fa,
-        bool* Xa,
-        int* Ca,
+        node* Va, // nodes
+        int* Ea, // edges
+        bool* Fa, // frontier
+        bool* Xa, // visited
+        int* Ca, // cost
         int num_nodes,
         bool* done)
     {
-
         int id = threadIdx.x + blockIdx.x * blockDim.x;
 
         if (id > num_nodes)
             *done = false;
 
-        if (Fa[id] == true && Xa[id] == false) {
+        if (*done && Fa[id] == true && Xa[id] == false) {
             printf("%d ", id); //This printf gives the order of vertices in BFS
             Fa[id] = false;
             Xa[id] = true;
             __syncthreads();
-            int k = 0;
-            int i;
             int start = Va[id].first;
             int end = start + Va[id].second;
             for (int i = start; i < end; i++) {
