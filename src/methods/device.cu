@@ -39,13 +39,12 @@ namespace cuda {
         if (id >= num_nodes) {
             *done = false;
         } else if (Fa[id] == true && Xa[id] == false) {
-            printf("%d ", id); //This printf gives the order of vertices in BFS
             Fa[id] = false;
             Xa[id] = true;
             __syncthreads();
-            int start = Va[id].first;
-            int end = start + Va[id].second;
-            for (int i = start; i < end; i++) {
+            uint start = Va[id].first;
+            uint end = start + Va[id].second;
+            for (uint i = start; i < end; i++) {
                 int nid = Ea[i];
 
                 if (Xa[nid] == false) {
@@ -64,7 +63,7 @@ namespace cuda {
         int num_blocks = (int)ceil(input.size / (double)block_size);
 
         node* h_nodes = (node*)calloc(input.size, sizeof(node));
-        int* h_edges = (int*)calloc(input.num_edges, sizeof(int));
+        uint* h_edges = (uint*)calloc(input.num_edges, sizeof(uint));
         bool* h_frontier = (bool*)calloc(input.size, sizeof(bool));
         bool* h_visited = (bool*)calloc(input.size, sizeof(bool));
         int* h_cost = (int*)calloc(input.size, sizeof(int));
@@ -75,8 +74,8 @@ namespace cuda {
         HANDLE_ERROR(cudaMalloc((void**)&Va, sizeof(node) * input.size));
         HANDLE_ERROR(cudaMemcpy(Va, h_nodes, sizeof(node) * input.size, cudaMemcpyHostToDevice));
         int* Ea;
-        HANDLE_ERROR(cudaMalloc((void**)&Ea, sizeof(node) * input.size));
-        HANDLE_ERROR(cudaMemcpy(Ea, h_edges, sizeof(node) * input.size, cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaMalloc((void**)&Ea, sizeof(uint) * input.size));
+        HANDLE_ERROR(cudaMemcpy(Ea, h_edges, sizeof(uint) * input.size, cudaMemcpyHostToDevice));
         bool* Fa;
         HANDLE_ERROR(cudaMalloc((void**)&Fa, sizeof(bool) * input.size));
         HANDLE_ERROR(cudaMemcpy(Fa, h_frontier, sizeof(bool) * input.size, cudaMemcpyHostToDevice));
