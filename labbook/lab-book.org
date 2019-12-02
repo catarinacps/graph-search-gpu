@@ -144,6 +144,30 @@ popd
 rm -rf $SCRATCH/*
 #+end_src
 
+** Visualizações
+
+Lendo os dados:
+
+#+begin_src R :tangle yes :session :results none
+df <- read_csv("cpu/data/cpu_aa_tp2_draco*_32.csv")
+#+end_src
+
+E agora plotando:
+
+#+begin_src R :session :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 600 :height 400
+df %>%
+  ggplot(aes(x = as.factor(instance), y = time)) +
+  stat_boxplot(geom = 'errorbar', width = 0.2) +
+  geom_boxplot(width = 0.2, fill = method, position = position_dodge(width = .325)) +
+  stat_summary(fun.y = mean, geom = "point", size = 2, color = "white", position = position_dodge(width = .325)) +
+  ylim(0, NA) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 6)) +
+  labs(x = "Instancia de teste", y = "Tempo (segundos)") +
+  theme_bw() +
+  theme(text = element_text(family = "Palatino", size = 16),
+        axis.text.x = element_text(angle = 45, vjust = 0.6))
+#+end_src
+
 * Em GPU
 
 Sobre a execução dos algoritmos em suas versões em CUDA. Atenção: versão do BFS
@@ -278,3 +302,71 @@ tar czf $EXP_DIR/data/$EXP_NAME.tar.gz *
 popd
 rm -rf $SCRATCH/*
 #+end_src
+
+** Visualizações
+
+Lendo os dados:
+
+#+begin_src R :tangle yes :session :results output
+df <- read_csv("gpu/data/results/gpu_aa_tp2_draco4_32.csv")
+#+end_src
+
+#+RESULTS:
+: Parsed with column specification:
+: cols(
+:   id = col_double(),
+:   method = col_character(),
+:   instance = col_character(),
+:   block_size = col_double(),
+:   time = col_double()
+: )
+
+E agora plotando:
+
+#+begin_src R :session :results output graphics :file images/bfs_cuda.png :exports both :width 900 :height 600
+df %>%
+  filter(method == "bfs") %>%
+  mutate(sblock = as.factor(block_size)) %>%
+  ggplot(aes(x = as.factor(instance), y = time, fill = sblock, color = sblock)) +
+  stat_boxplot(geom = 'errorbar', width = 0.2) +
+  geom_boxplot(width = 0.2, position = position_dodge(width = .325)) +
+  stat_summary(fun.y = mean, geom = "point", size = 2, color = "red", position = position_dodge(width = .325)) +
+  ylim(0, NA) +
+  scale_fill_discrete(name = "Tamanho do bloco") +
+  scale_color_discrete(name = "Tamanho do bloco") +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 6)) +
+  labs(x = "Instância de teste",
+       y = "Tempo (segundos)",
+       title = "Tempo de execução para o BFS em CUDA") +
+  theme_bw() +
+  theme(text = element_text(family = "Palatino", size = 16),
+        axis.text.x = element_text(angle = 45, vjust = 0.6),
+        legend.position = "top")
+#+end_src
+
+#+RESULTS:
+[[file:images/bfs_cuda.png]]
+
+#+begin_src R :session :results output graphics :file images/floyd_cuda.png :exports both :width 900 :height 600
+df %>%
+  filter(method == "floyd") %>%
+  mutate(sblock = as.factor(block_size)) %>%
+  ggplot(aes(x = as.factor(instance), y = time, fill = sblock, color = sblock)) +
+  stat_boxplot(geom = 'errorbar', width = 0.2) +
+  geom_boxplot(width = 0.2, position = position_dodge(width = .325)) +
+  stat_summary(fun.y = mean, geom = "point", size = 2, color = "red", position = position_dodge(width = .325)) +
+  ylim(0, NA) +
+  scale_fill_discrete(name = "Tamanho do bloco") +
+  scale_color_discrete(name = "Tamanho do bloco") +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 6)) +
+  labs(x = "Instância de teste",
+       y = "Tempo (segundos)",
+       title = "Tempo de execução para o Floyd-Warshall em CUDA") +
+  theme_bw() +
+  theme(text = element_text(family = "Palatino", size = 16),
+        axis.text.x = element_text(angle = 45, vjust = 0.6),
+        legend.position = "top")
+#+end_src
+
+#+RESULTS:
+[[file:images/floyd_cuda.png]]
