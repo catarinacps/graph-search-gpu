@@ -45,7 +45,7 @@ bool bfs(const graph& input, uint searched_vertex, uint initial_vertex, bool ver
 
     fmt::print("time: {}", get_time() - initial_time);
 
-    return false;
+    return true;
 }
 
 bool floyd_warshall(const graph& input, bool verbose)

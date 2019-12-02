@@ -25,7 +25,7 @@ enum class implementation {
 
 int main(int argc, char* argv[])
 {
-    uint searched_vertex = 5000, initial_vertex = 0, block_size = 32;
+    uint searched_vertex = 10000, initial_vertex = 0, block_size = 32;
     auto selected_m = method::help;
     auto selected_i = implementation::cpu;
     bool verbose = false;
