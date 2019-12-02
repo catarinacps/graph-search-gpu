@@ -27,16 +27,16 @@ namespace cuda {
 
     static __global__ void bfs_kernel(
         node* Va, // nodes
-        int* Ea, // edges
+        uint* Ea, // edges
         bool* Fa, // frontier
         bool* Xa, // visited
         int* Ca, // cost
-        int num_nodes,
+        uint* num_nodes,
         bool* done)
     {
         int id = threadIdx.x + blockIdx.x * blockDim.x;
 
-        if (id >= num_nodes) {
+        if (id >= *num_nodes) {
             *done = false;
         } else if (Fa[id] == true && Xa[id] == false) {
             Fa[id] = false;
@@ -60,7 +60,7 @@ namespace cuda {
     {
         HANDLE_ERROR(cudaSetDevice(0));
 
-        int num_blocks = (int)ceil(input.size / (double)block_size);
+        uint num_blocks = (uint)ceil(input.size / (double)block_size);
 
         node* h_nodes = (node*)calloc(input.size, sizeof(node));
         uint* h_edges = (uint*)calloc(2 * input.num_edges, sizeof(uint));
@@ -73,7 +73,7 @@ namespace cuda {
         node* Va;
         HANDLE_ERROR(cudaMalloc((void**)&Va, sizeof(node) * input.size));
         HANDLE_ERROR(cudaMemcpy(Va, h_nodes, sizeof(node) * input.size, cudaMemcpyHostToDevice));
-        int* Ea;
+        uint* Ea;
         HANDLE_ERROR(cudaMalloc((void**)&Ea, sizeof(uint) * 2 * input.num_edges));
         HANDLE_ERROR(cudaMemcpy(Ea, h_edges, sizeof(uint) * 2 * input.num_edges, cudaMemcpyHostToDevice));
         bool* Fa;
@@ -121,7 +121,7 @@ namespace cuda {
             stop = true;
 
             HANDLE_ERROR(cudaMemcpy(d_over, &stop, sizeof(bool), cudaMemcpyHostToDevice));
-            bfs_kernel<<<grid, threads>>>(Va, Ea, Fa, Xa, Ca, *d_num_nodes, d_over);
+            bfs_kernel<<<grid, threads>>>(Va, Ea, Fa, Xa, Ca, d_num_nodes, d_over);
             HANDLE_ERROR(cudaMemcpy(&stop, d_over, sizeof(bool), cudaMemcpyDeviceToHost));
 
             k++;
