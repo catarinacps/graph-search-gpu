@@ -37,7 +37,7 @@ namespace cuda {
         int id = threadIdx.x + blockIdx.x * blockDim.x;
 
         if (id >= *num_nodes) {
-            *done = false;
+            *done = true;
         } else if (Fa[id] == true && Xa[id] == false) {
             Fa[id] = false;
             Xa[id] = true;
@@ -135,11 +135,11 @@ namespace cuda {
         HANDLE_ERROR(cudaMemcpy(h_cost, Ca, sizeof(int) * input.size, cudaMemcpyDeviceToHost));
 
         if (verbose) {
-            fmt::print("Number of times the kernel is called : {}\n", k);
+            fmt::print("\nnumber of times the kernel is called : {}\n", k);
 
-            fmt::print("\nCost: ");
+            fmt::print("\ncost:\n");
             for (uint i = 0; i < input.size; i++)
-                fmt::print("{}    ", h_cost[i]);
+                fmt::print("{} ", h_cost[i]);
         }
 
         free(h_nodes);
