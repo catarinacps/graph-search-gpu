@@ -37,7 +37,7 @@ namespace cuda {
         int id = threadIdx.x + blockIdx.x * blockDim.x;
 
         if (id >= *num_nodes) {
-            *done = true;
+            return;
         } else if (Fa[id] == true && Xa[id] == false) {
             Fa[id] = false;
             Xa[id] = true;
