@@ -132,6 +132,16 @@ namespace cuda {
 
         fmt::print("time: {}", get_time() - initial_time);
 
+        HANDLE_ERROR(cudaMemcpy(h_cost, Ca, sizeof(int) * input.size, cudaMemcpyDeviceToHost));
+
+        if (verbose) {
+            fmt::print("Number of times the kernel is called : {}\n", k);
+
+            fmt::print("\nCost: ");
+            for (uint i = 0; i < input.size; i++)
+                fmt::print("{}    ", h_cost[i]);
+        }
+
         free(h_nodes);
         free(h_edges);
         free(h_frontier);
