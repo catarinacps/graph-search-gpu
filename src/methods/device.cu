@@ -113,9 +113,6 @@ namespace cuda {
         HANDLE_ERROR(cudaMalloc((void**)&d_num_nodes, sizeof(uint)));
         HANDLE_ERROR(cudaMemcpy(d_num_nodes, &input.size, sizeof(uint), cudaMemcpyHostToDevice));
 
-        dim3 grid(num_blocks, 1, 1);
-        dim3 threads(block_size, 1, 1);
-
         auto initial_time = get_time();
 
         int k = 0;
@@ -125,7 +122,7 @@ namespace cuda {
             stop = true;
 
             HANDLE_ERROR(cudaMemcpy(d_over, &stop, sizeof(bool), cudaMemcpyHostToDevice));
-            bfs_kernel<<<grid, threads>>>(Va, Ea, Fa, Xa, Ca, d_num_nodes, d_over);
+            bfs_kernel<<<num_blocks, block_size>>>(Va, Ea, Fa, Xa, Ca, d_num_nodes, d_over);
             HANDLE_ERROR(cudaMemcpy(&stop, d_over, sizeof(bool), cudaMemcpyDeviceToHost));
 
             k++;

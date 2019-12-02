@@ -1,0 +1,280 @@
+#+title: Lab-book
+#+author: Henrique Silva
+#+email: hcpsilva@inf.ufrgs.br
+#+infojs_opt:
+#+property: session *R*
+#+property: cache yes
+#+property: results graphics
+#+property: exports both
+#+property: tangle yes
+
+Bem vindo ao lab-book desse repositório, destinado aos experimentos desse
+projeto.
+
+* Em CPU
+
+Sobre as execuções dos algoritmos para ambas implementações single-threaded em
+CPU.
+
+** Design
+
+Seed randômica:
+
+#+begin_src R :session :results value :exports results
+floor(runif(1,1,99999))
+#+end_src
+
+#+RESULTS:
+: 6587
+
+Design:
+
+#+begin_src R :session :results none
+suppressMessages(library(DoE.base))
+suppressMessages(library(tidyverse))
+options(crayon.enabled=FALSE)
+
+met = c("bfs", "floyd")
+inst = c("binomial", "complete", "random1250", "random250")
+
+fac.design(
+  nfactors=2,
+  replications=30,
+    repeat.only=FALSE,
+    blocks=1,
+    randomize=TRUE,
+    seed=6587,
+    factor.names=list(
+      method=met,
+      instance=inst)) %>%
+  as_tibble %>%
+  transmute(id = as.numeric(Blocks), method, instance) %>%
+  write_delim("cpu/runs.plan", delim=" ", col_names=FALSE)
+
+# the space delimited file is to help with the posterior parsing in the shell
+# script
+#+end_src
+
+** Script
+
+#+begin_src bash :exports both :results output :tangle cpu/script.slurm
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --chdir=.
+#SBATCH --partition=draco
+#SBATCH --nodes=1
+#SBATCH --output=%x_%j.out
+#SBATCH --error=%x_%j.err
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=hcpsilva@inf.ufrgs.br
+
+set -euo pipefail
+
+HOST=$(hostname)
+
+# machine:
+MACHINE=${HOST}_${SLURM_CPUS_ON_NODE}
+
+# parameters:
+# the experiment ID, defined in the lab-book
+EXP_ID=cpu_aa_tp2
+# the code directory
+CODE_DIR=$1
+# the experiment directory
+EXP_DIR=$CODE_DIR/labbook/cpu
+
+# experiment name (which is the ID and the machine and its core count)
+EXP_NAME=${EXP_ID}_${MACHINE}
+
+# go to the scratch dir
+cd $SCRATCH
+
+# and clean everything
+rm -rf *
+
+# prepare our directory
+mkdir $EXP_NAME
+pushd $EXP_NAME
+
+# set out chosen cuda path version
+CUDA_INTALLATION=/usr/local/cuda-10.1
+
+# update env vars
+LD_LIBRARY_PATH+=:${CUDA_INSTALLATION}/lib64
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+
+PATH+=:${CUDA_INSTALLATION}/bin
+export PATH=$PATH
+
+# copy the code folder
+cp -r $CODE_DIR code
+mkdir results
+results_csv=$(readlink -f results/${EXP_NAME}.csv)
+results_dir=$(readlink -f results)
+pushd code
+
+# build so we run faster
+make CUDA_OPT=NVIDIA CUDA_PATH=$CUDA_INSTALLATION
+
+# init the csv results file
+echo "id,method,instance,time" > $results_csv
+
+# math solver
+while read -r id method instance; do
+    csv_line=${id},${method},${instance}
+
+    echo
+    echo "--> Running with params: $id $method $instance"
+
+    log_file=$results_dir/${id}_${method}_${instance}.log
+
+    ./build/gsg cpu $method data/$instance > $log_file
+
+    time_obs=$(grep '^time' $log_file | awk '{print $2}')
+
+    echo ${csv_line},${time_obs} >> $results_csv
+done < $EXP_DIR/runs.plan
+
+popd
+
+# pack everything and send to the exp dir
+tar czf $EXP_DIR/data/$EXP_NAME.tar.gz *
+
+popd
+rm -rf $SCRATCH/*
+#+end_src
+
+* Em GPU
+
+Sobre a execução dos algoritmos em suas versões em CUDA. Atenção: versão do BFS
+provavelmente esta errada.
+
+** Design
+
+Seed randômica:
+
+#+begin_src R :session :results value :exports results
+floor(runif(1,1,99999))
+#+end_src
+
+#+RESULTS:
+: 18305
+
+Design:
+
+#+begin_src R :session :results none
+suppressMessages(library(DoE.base))
+suppressMessages(library(tidyverse))
+options(crayon.enabled=FALSE)
+
+met = c("bfs", "floyd")
+inst = c("binomial", "complete", "random1250", "random250")
+blk = c(16, 32, 64, 92, 128, 256)
+
+fac.design(
+  nfactors=3,
+  replications=30,
+    repeat.only=FALSE,
+    blocks=1,
+    randomize=TRUE,
+    seed=18305,
+    factor.names=list(
+      method=met,
+      instance=inst,
+      block_size=blk)) %>%
+  as_tibble %>%
+  transmute(id = as.numeric(Blocks), method, instance, block_size) %>%
+  write_delim("gpu/runs.plan", delim=" ", col_names=FALSE)
+
+# the space delimited file is to help with the posterior parsing in the shell
+# script
+#+end_src
+
+** Script
+
+#+begin_src bash :exports both :results output :tangle gpu/script.slurm
+#!/bin/bash
+#SBATCH --time=24:00:00
+#SBATCH --chdir=.
+#SBATCH --partition=draco
+#SBATCH --nodes=1
+#SBATCH --output=%x_%j.out
+#SBATCH --error=%x_%j.err
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=hcpsilva@inf.ufrgs.br
+
+set -euo pipefail
+
+HOST=$(hostname)
+
+# machine:
+MACHINE=${HOST}_${SLURM_CPUS_ON_NODE}
+
+# parameters:
+# the experiment ID, defined in the lab-book
+EXP_ID=gpu_aa_tp2
+# the code directory
+CODE_DIR=$1
+# the experiment directory
+EXP_DIR=$CODE_DIR/labbook/gpu
+
+# experiment name (which is the ID and the machine and its core count)
+EXP_NAME=${EXP_ID}_${MACHINE}
+
+# go to the scratch dir
+cd $SCRATCH
+
+# and clean everything
+rm -rf *
+
+# prepare our directory
+mkdir $EXP_NAME
+pushd $EXP_NAME
+
+# set out chosen cuda path version
+CUDA_INTALLATION=/usr/local/cuda-10.1
+
+# update env vars
+LD_LIBRARY_PATH+=:${CUDA_INSTALLATION}/lib64
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+
+PATH+=:${CUDA_INSTALLATION}/bin
+export PATH=$PATH
+
+# copy the code folder
+cp -r $CODE_DIR code
+mkdir results
+results_csv=$(readlink -f results/${EXP_NAME}.csv)
+results_dir=$(readlink -f results)
+pushd code
+
+# build so we run faster
+make CUDA_OPT=NVIDIA CUDA_PATH=$CUDA_INSTALLATION
+
+# init the csv results file
+echo "id,method,instance,block_size,time" > $results_csv
+
+# math solver
+while read -r id method instance block_size; do
+    csv_line=${id},${method},${instance},${}
+
+    echo
+    echo "--> Running with params: $id $method $instance $block_size"
+
+    log_file=$results_dir/${id}_${method}_${instance}_${block_size}.log
+
+    ./build/gsg cuda -b $block_size $method data/$instance > $log_file
+
+    time_obs=$(grep '^time' $log_file | awk '{print $2}')
+
+    echo ${csv_line},${time_obs} >> $results_csv
+done < $EXP_DIR/runs.plan
+
+popd
+
+# pack everything and send to the exp dir
+tar czf $EXP_DIR/data/$EXP_NAME.tar.gz *
+
+popd
+rm -rf $SCRATCH/*
+#+end_src
